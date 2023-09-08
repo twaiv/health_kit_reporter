@@ -7,10 +7,15 @@
 
 import Flutter
 import HealthKitReporter
+import HealthKit
+import WorkoutKit
+import SwiftUI
 
 // MARK: - MethodCall
 extension SwiftHealthKitReporterPlugin {
     private enum Method: String {
+        case appleWatchSync
+        case isAppleWatchSyncAvailable
         case isAvailable
         case requestAuthorization
         case preferredUnits
@@ -37,7 +42,7 @@ extension SwiftHealthKitReporterPlugin {
         case deleteObjects
         case save
     }
-
+    
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         guard let method = Method(rawValue: call.method) else {
             result(
@@ -49,12 +54,12 @@ extension SwiftHealthKitReporterPlugin {
             )
             return
         }
-
+        
         if method == .isAvailable {
             result(HealthKitReporter.isHealthDataAvailable)
             return
         }
-
+        
         guard let reporter = self.reporter else {
             result(
                 FlutterError(
@@ -65,8 +70,27 @@ extension SwiftHealthKitReporterPlugin {
             )
             return
         }
-
+        
         switch method {
+        case .appleWatchSync:
+            guard let arguments = call.arguments as? [String: Any] else {
+                throwNoArgumentsError(result: result)
+                return
+            }
+            if #available(iOS 17.0, *) {
+                appleWatchSync(
+                    arguments: arguments,
+                    result: result
+                )
+            } else {
+                result("not available");
+            }
+        case .isAppleWatchSyncAvailable:
+            if #available(iOS 17.0, *) {
+                result(HealthKitReporter.isHealthDataAvailable)
+            } else {
+                result(false)
+            }
         case .isAvailable:
             result(HealthKitReporter.isHealthDataAvailable)
         case .requestAuthorization:
@@ -299,8 +323,395 @@ extension SwiftHealthKitReporterPlugin {
         }
     }
 }
+
+
+struct Twaiv {
+    // This file was generated from JSON Schema using quicktype, do not modify it directly.
+    // To parse the JSON, add this file to your project and do:
+    //
+    //   let workout = try? JSONDecoder().decode(Workout.self, from: jsonData)
+    
+    /// A representation of a single workout
+    // MARK: - Workout
+    struct Workout: Codable {
+        /// the training block this workout is from
+        let block: String?
+        /// A description of this workout. This may be used to show the athlete information about
+        /// this workout
+        let description: String
+        /// The distance for that workout in m (optional)
+        let distance: Int?
+        /// The estimated distance for that workout in m
+        let estimatedDistance: Int?
+        /// The anticipated effort for this workout
+        let estimatedEffort: Double?
+        /// The estimated time for that workout in seconds
+        let estimatedTime: Int?
+        /// Wether this workout has priority.
+        let hasPriority: Bool?
+        /// the vo2max which was used to describe this workout
+        let pacingVo2Max: Double?
+        /// the training plan this workout is from
+        let plan: String?
+        /// database revision number of the object
+        let revision: Int?
+        let steps: [WorkoutStep]
+        /// The title of the subgoal.
+        let subgoalTitle: String?
+        /// The time for that workout in seconds (optional)
+        let time: Int?
+        /// The human readable name of the workout
+        let title: String
+        /// The number of repetitions x interval duration. Is null for ordinary endurance runs or
+        /// races
+        let titleContent: String?
+        /// The main pace of this workout. Can be null if training paces have not been defined yet.
+        let titlePace: String?
+        /// primary id
+        let workoutID: String?
+        
+        enum CodingKeys: String, CodingKey {
+            case block, description, distance
+            case estimatedDistance = "estimated_distance"
+            case estimatedEffort = "estimated_effort"
+            case estimatedTime = "estimated_time"
+            case hasPriority = "has_priority"
+            case pacingVo2Max = "pacing_vo2max"
+            case plan, revision, steps
+            case subgoalTitle = "subgoal_title"
+            case time, title
+            case titleContent = "title_content"
+            case titlePace = "title_pace"
+            case workoutID = "workout_id"
+        }
+    }
+    
+    // MARK: - WorkoutStep
+    struct WorkoutStep: Codable {
+        /// This is additional information about this step
+        let description: String?
+        let downhill: Bool?
+        let drill: Drill?
+        let duration: Duration
+        /// This is an optional field for an interval step
+        let interval: Interval?
+        /// The type of step
+        let stepType: StepType
+        let target: Target?
+        let targetSemanticPace: SemanticPace?
+        /// The title of this step
+        let title: String
+        let uphill: Bool?
+        
+        enum CodingKeys: String, CodingKey {
+            case description, downhill, drill, duration, interval
+            case stepType = "step_type"
+            case target
+            case targetSemanticPace = "target_semantic_pace"
+            case title, uphill
+        }
+    }
+    
+    // MARK: - Drill
+    struct Drill: Codable {
+        let drillType: DrillType
+        let repetitions: Int
+        
+        enum CodingKeys: String, CodingKey {
+            case drillType = "drill_type"
+            case repetitions
+        }
+    }
+    
+    enum DrillType: String, Codable {
+        case drillStrides = "drill_strides"
+    }
+    
+    // MARK: - Duration
+    struct Duration: Codable {
+        let durationType: DurationType
+        /// Value for the duration as duration_type
+        let value: Double
+        
+        enum CodingKeys: String, CodingKey {
+            case durationType = "duration_type"
+            case value
+        }
+    }
+    
+    enum DurationType: String, Codable {
+        case distance = "distance"
+        case time = "time"
+    }
+    
+    /// This is an optional field for an interval step
+    // MARK: - Interval
+    struct Interval: Codable {
+        let recoveryTarget: Target?
+        let recoveryTargetSemanticPace: SemanticPace?
+        /// How often the steps are executed
+        let repetitions: Int
+        let steps: [IntervalStep]?
+        
+        enum CodingKeys: String, CodingKey {
+            case recoveryTarget = "recovery_target"
+            case recoveryTargetSemanticPace = "recovery_target_semantic_pace"
+            case repetitions, steps
+        }
+    }
+    
+    /// This is an optional field which defines the target range for this step
+    // MARK: - Target
+    struct Target: Codable {
+        /// The lower bound value of the range
+        let lowerBound: Double
+        /// This defines the type target for this step
+        let type: TargetType
+        /// The upper bound value of the range
+        let upperBound: Double
+        
+        enum CodingKeys: String, CodingKey {
+            case lowerBound = "lower_bound"
+            case type
+            case upperBound = "upper_bound"
+        }
+    }
+    
+    /// This defines the type target for this step
+    enum TargetType: String, Codable {
+        case heartRate = "heart rate"
+        case pace = "pace"
+    }
+    
+    enum SemanticPace: String, Codable {
+        case paceEasy = "PaceEasy"
+        case paceHard = "PaceHard"
+        case paceModerate = "PaceModerate"
+        case paceNone = "PaceNone"
+        case paceRecovery = "PaceRecovery"
+        case paceSprint = "PaceSprint"
+        case paceVo2Max = "PaceVo2Max"
+    }
+    
+    // MARK: - IntervalStep
+    struct IntervalStep: Codable {
+        /// Value for the intense duration as duration_type
+        let intense: Double
+        /// Value for the recovery duration as duration_type
+        let recovery: Double
+    }
+    
+    /// The type of step
+    enum StepType: String, Codable {
+        case stepCoolDown = "StepCoolDown"
+        case stepRun = "StepRun"
+        case stepWarmUp = "StepWarmUp"
+    }
+}
+
+@available(iOS 17.0, *)
+extension SwiftHealthKitReporterPlugin {
+    
+    
+    static func convertTwaivWorkoutFake(twaivWorkout: Twaiv.Workout) -> CustomWorkout {
+        let warmupStep = WorkoutStep(goal: .time(10, .minutes))
+        let cooldownStep = WorkoutStep(goal: .time(10, .minutes))
+        
+        var recoveryStep = IntervalStep(.recovery)
+        recoveryStep.step.goal = .distance(2, .miles)
+        recoveryStep.step.alert = .speed(10...12, unit: .milesPerHour, metric: .current)
+        
+        var tempoStep = IntervalStep(.work)
+        tempoStep.step.goal = .distance(3, .miles)
+        tempoStep.step.alert = .speed(10...15, unit: .milesPerHour, metric: .current)
+        
+        var block = IntervalBlock()
+        
+        block.steps = [
+            recoveryStep,
+            tempoStep,
+            tempoStep,
+            recoveryStep
+        ]
+        block.iterations = 4
+        
+        return CustomWorkout(activity: .running,
+                             location: .outdoor,
+                             displayName: "Dauerlauf 45 min",
+                             warmup: warmupStep,
+                             blocks: [block],
+                             cooldown: cooldownStep)
+    }
+    
+    func goalFromTwaivDuration(twaivDuration: Twaiv.Duration) -> WorkoutGoal {
+        if twaivDuration.durationType == Twaiv.DurationType.distance {
+            return .distance(twaivDuration.value, .meters)
+        }
+        if twaivDuration.durationType == Twaiv.DurationType.time {
+            return .time(twaivDuration.value, .seconds)
+        }
+        return .open
+    }
+    func goalFromTwaivDurationWithDifferentValue(twaivDuration: Twaiv.Duration, value: Double) -> WorkoutGoal {
+        if twaivDuration.durationType == Twaiv.DurationType.distance {
+            return .distance(value, .meters)
+        }
+        if twaivDuration.durationType == Twaiv.DurationType.time {
+            return .time(value, .seconds)
+        }
+        return .open
+    }
+
+    func convertTwaivWorkout(twaivWorkout: Twaiv.Workout) -> CustomWorkout {
+        var warmupStep: WorkoutStep?
+        var cooldownStep: WorkoutStep?
+        var blocks : [IntervalBlock] = []
+        
+        for step in twaivWorkout.steps {
+            if step.stepType == Twaiv.StepType.stepWarmUp {
+                warmupStep = WorkoutStep(goal: goalFromTwaivDuration(twaivDuration: step.duration))
+                continue
+            }
+            if step.stepType == Twaiv.StepType.stepCoolDown {
+                cooldownStep = WorkoutStep(goal: goalFromTwaivDuration(twaivDuration: step.duration))
+                continue
+            }
+            if step.stepType == Twaiv.StepType.stepRun {
+                var block = IntervalBlock()
+                if step.interval != nil && step.interval?.steps != nil {
+                    let interval = step.interval!
+                    block.steps = [];
+                    block.iterations = interval.repetitions
+                    for istep in interval.steps! {
+                        var intenseStep = IntervalStep(.work, goal: goalFromTwaivDurationWithDifferentValue(twaivDuration: step.duration, value: istep.intense))
+                        if step.target?.type == Twaiv.TargetType.pace {
+                            var lower = step.target?.lowerBound ?? 0
+                            var upper = step.target?.upperBound ?? 0
+                            if upper > 0 && lower >= upper {
+                                let delta = lower - upper
+                                if delta < 16 {
+                                    lower += (16-delta)/2
+                                    upper -= (16-delta)/2
+                                }
+                                intenseStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .current);
+                            }
+                        }
+                        block.steps.append(intenseStep)
+                        if istep.recovery > 0 {
+                            var recoveryStep = IntervalStep(.recovery, goal: goalFromTwaivDurationWithDifferentValue(twaivDuration: step.duration, value: istep.recovery));
+                            if step.interval?.recoveryTarget?.type == Twaiv.TargetType.pace &&
+                                step.interval?.recoveryTargetSemanticPace != Twaiv.SemanticPace.paceNone &&
+                                step.interval?.recoveryTargetSemanticPace != Twaiv.SemanticPace.paceRecovery {
+                                var lower = step.interval?.recoveryTarget?.lowerBound ?? 0
+                                var upper = step.interval?.recoveryTarget?.upperBound ?? 0
+                                if upper > 0 && lower >= upper {
+                                    let delta = lower - upper
+                                    if delta < 16 {
+                                        lower += (16-delta)/2
+                                        upper -= (16-delta)/2
+                                    }
+                                    recoveryStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .current);
+                                }
+                            }
+                            block.steps.append(recoveryStep)
+                        }
+                    }
+                } else {
+                    var workoutStep = IntervalStep(.work, goal: goalFromTwaivDuration(twaivDuration: step.duration))
+                    if step.target?.type == Twaiv.TargetType.pace {
+                        var lower = step.target?.lowerBound ?? 0
+                        var upper = step.target?.upperBound ?? 0
+                        if upper > 0 && lower >= upper {
+                            let delta = lower - upper
+                            if delta < 16 {
+                                lower += (16-delta)/2
+                                upper -= (16-delta)/2
+                            }
+                            workoutStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .current);
+                        }
+                    }
+                    block.steps = [workoutStep]
+                }
+                blocks.append(block)
+                continue
+            }
+        }
+        return CustomWorkout(activity: .running,
+                             location: .outdoor,
+                             displayName: twaivWorkout.title,
+                             warmup: warmupStep,
+                             blocks: blocks,
+                             cooldown: cooldownStep)
+    }
+    private func appleWatchSync(
+        arguments: [String: Any],
+        result: @escaping FlutterResult
+    ) {
+        
+        Task {
+            let jsonData = arguments["workout"] as? String
+            if jsonData == nil {
+                result("no workout");
+                return;
+            }
+            var twaivWorkout: Twaiv.Workout?
+            do {
+                twaivWorkout = try JSONDecoder().decode(Twaiv.Workout.self, from: jsonData!.data(using: .utf16)!)
+            } catch {
+                result(
+                    FlutterError(
+                        code: "Workout",
+                        message: "Error in json decoding of workout",
+                        details: error
+                    )
+                )
+                return
+            }
+            
+            if twaivWorkout == nil {
+                result("broken workout");
+                return;
+            }
+            
+            let runningWorkout = convertTwaivWorkout(twaivWorkout: twaivWorkout!)
+            
+            let state = await WorkoutScheduler.shared.requestAuthorization()
+            if (state != WorkoutScheduler.AuthorizationState.authorized) {
+                result("not authorized");
+                return;
+            }
+            
+            
+            
+            let workoutPlan = WorkoutPlan(.custom(runningWorkout));
+            
+            await WorkoutScheduler.shared.removeAllWorkouts();
+            
+            var daysAheadComponents = DateComponents()
+            daysAheadComponents.day = 0
+            daysAheadComponents.hour = 1
+            
+            guard let nextDate = Calendar.autoupdatingCurrent.date(byAdding: daysAheadComponents, to: .now) else {
+                result("failure")
+                return
+            }
+            
+            let nextDateComponents = Calendar.autoupdatingCurrent.dateComponents(in: .autoupdatingCurrent, from: nextDate)
+            
+            await WorkoutScheduler.shared.schedule(workoutPlan, at: nextDateComponents);
+            
+            result("success")
+        }
+        //            Task {
+        //                try await workoutComposition.presentPreview()
+        //            }
+    }
+}
+
+
 // MARK: - Method Call methods
 extension SwiftHealthKitReporterPlugin {
+    
     private func requestAuthorization(
         reporter: HealthKitReporter,
         arguments: [String: [String]],
@@ -310,11 +721,11 @@ extension SwiftHealthKitReporterPlugin {
         let toWriteArguments = arguments["toWrite"]
         reporter.manager.requestAuthorization(
             toRead: toReadArguments != nil
-                ? parse(arguments: toReadArguments!)
-                : [],
+            ? parse(arguments: toReadArguments!)
+            : [],
             toWrite: toWriteArguments != nil
-                ? parse(arguments: toWriteArguments!)
-                : []
+            ? parse(arguments: toWriteArguments!)
+            : []
         ) { (success, error) in
             guard error == nil else {
                 result(
@@ -1286,8 +1697,8 @@ extension SwiftHealthKitReporterPlugin {
                     try Category.make(from: $0)
                 },
                 from: device != nil
-                    ? try Device.make(from: device!)
-                    : nil,
+                ? try Device.make(from: device!)
+                : nil,
                 to: try Workout.make(from: workout)
             ) { (success, error) in
                 guard error == nil else {
@@ -1323,10 +1734,10 @@ extension SwiftHealthKitReporterPlugin {
             reporter.writer.addQuantitiy(try quantity.map {
                 try Quantity.make(from: $0)
             },
-            from: device != nil
-                ? try Device.make(from: device!)
-                : nil,
-            to: try Workout.make(from: workout)) { (success, error) in
+                                         from: device != nil
+                                         ? try Device.make(from: device!)
+                                         : nil,
+                                         to: try Workout.make(from: workout)) { (success, error) in
                 guard error == nil else {
                     result(
                         FlutterError(
@@ -1550,3 +1961,95 @@ extension SwiftHealthKitReporterPlugin {
         )
     }
 }
+
+@available(iOS 17.0, *)
+struct WorkoutStore {
+    static func createCyclingCustomWorkout() -> CustomWorkout {
+        // Warmup step
+        let warmupStep = WorkoutStep()
+        
+        // Block 1.
+        let block1 = Self.cyclingBlockOne()
+        
+        // Block 2.
+        let block2 = Self.cyclingBlockTwo()
+        
+        // Cooldown.
+        let cooldownStep = WorkoutStep(goal: .time(5, .minutes))
+        
+        return CustomWorkout(activity: .cycling,
+                             location: .outdoor,
+                             displayName: "My Workout",
+                             warmup: warmupStep,
+                             blocks: [block1, block2],
+                             cooldown: cooldownStep)
+    }
+    
+    static func cyclingBlockOne() -> IntervalBlock {
+        // Work step 1.
+        var workStep1 = IntervalStep(.work)
+        workStep1.step.goal = .distance(2, .miles)
+        workStep1.step.alert = .speed(10, unit: .milesPerHour, metric: .current)
+        
+        // Recovery step.
+        var recoveryStep1 = IntervalStep(.recovery)
+        recoveryStep1.step.goal = .distance(0.5, .miles)
+        recoveryStep1.step.alert = .heartRate(zone: 1)
+        
+        return IntervalBlock(steps: [workStep1, recoveryStep1],
+                             iterations: 4)
+    }
+    
+    static func cyclingBlockTwo() -> IntervalBlock {
+        // Work step.
+        var workStep2 = IntervalStep(.work)
+        workStep2.step.goal = .time(2, .minutes)
+        workStep2.step.alert = .power(250...275, unit: .watts)
+        
+        // Recovery step.
+        var recoveryStep2 = IntervalStep(.recovery)
+        recoveryStep2.step.goal = .time(30, .seconds)
+        recoveryStep2.step.alert = .heartRate(zone: 1)
+        
+        // Block with two iterations.
+        return IntervalBlock(steps: [workStep2, recoveryStep2],
+                             iterations: 2)
+    }
+    
+    static func createGolfWorkout() -> SingleGoalWorkout {
+        SingleGoalWorkout(activity: .golf,
+                          goal: .time(1, .hours))
+    }
+    
+    static func createRunningCustomWorkout() -> CustomWorkout {
+        let warmupStep = WorkoutStep(goal: .time(10, .minutes))
+        let cooldownStep = WorkoutStep(goal: .time(10, .minutes))
+        
+        var recoveryStep = IntervalStep(.recovery)
+        recoveryStep.step.goal = .distance(2, .miles)
+        recoveryStep.step.alert = .speed(10...12, unit: .milesPerHour, metric: .current)
+        
+        var tempoStep = IntervalStep(.work)
+        tempoStep.step.goal = .distance(3, .miles)
+        tempoStep.step.alert = .speed(10...15, unit: .milesPerHour, metric: .current)
+        
+        var block = IntervalBlock()
+        
+        block.steps = [
+            recoveryStep,
+            tempoStep,
+            tempoStep,
+            recoveryStep
+        ]
+        block.iterations = 4
+        
+        return CustomWorkout(activity: .running,
+                             location: .outdoor,
+                             displayName: "Dauerlauf 45 min",
+                             warmup: warmupStep,
+                             blocks: [block],
+                             cooldown: cooldownStep)
+    }
+}
+
+

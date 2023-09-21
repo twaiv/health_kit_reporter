@@ -519,11 +519,11 @@ extension SwiftHealthKitReporterPlugin {
         
         var recoveryStep = IntervalStep(.recovery)
         recoveryStep.step.goal = .distance(2, .miles)
-        recoveryStep.step.alert = .speed(10...12, unit: .milesPerHour, metric: .current)
+        recoveryStep.step.alert = .speed(10...12, unit: .milesPerHour, metric: .average)
         
         var tempoStep = IntervalStep(.work)
         tempoStep.step.goal = .distance(3, .miles)
-        tempoStep.step.alert = .speed(10...15, unit: .milesPerHour, metric: .current)
+        tempoStep.step.alert = .speed(10...15, unit: .milesPerHour, metric: .average)
         
         var block = IntervalBlock()
         
@@ -593,7 +593,7 @@ extension SwiftHealthKitReporterPlugin {
                                     lower += (16-delta)/2
                                     upper -= (16-delta)/2
                                 }
-                                intenseStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .current);
+                                intenseStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .average);
                             }
                         }
                         block.steps.append(intenseStep)
@@ -610,7 +610,7 @@ extension SwiftHealthKitReporterPlugin {
                                         lower += (16-delta)/2
                                         upper -= (16-delta)/2
                                     }
-                                    recoveryStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .current);
+                                    recoveryStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .average);
                                 }
                             }
                             block.steps.append(recoveryStep)
@@ -627,7 +627,7 @@ extension SwiftHealthKitReporterPlugin {
                                 lower += (16-delta)/2
                                 upper -= (16-delta)/2
                             }
-                            workoutStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .current);
+                            workoutStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .average)
                         }
                     }
                     block.steps = [workoutStep]
@@ -1961,95 +1961,4 @@ extension SwiftHealthKitReporterPlugin {
         )
     }
 }
-
-@available(iOS 17.0, *)
-struct WorkoutStore {
-    static func createCyclingCustomWorkout() -> CustomWorkout {
-        // Warmup step
-        let warmupStep = WorkoutStep()
-        
-        // Block 1.
-        let block1 = Self.cyclingBlockOne()
-        
-        // Block 2.
-        let block2 = Self.cyclingBlockTwo()
-        
-        // Cooldown.
-        let cooldownStep = WorkoutStep(goal: .time(5, .minutes))
-        
-        return CustomWorkout(activity: .cycling,
-                             location: .outdoor,
-                             displayName: "My Workout",
-                             warmup: warmupStep,
-                             blocks: [block1, block2],
-                             cooldown: cooldownStep)
-    }
-    
-    static func cyclingBlockOne() -> IntervalBlock {
-        // Work step 1.
-        var workStep1 = IntervalStep(.work)
-        workStep1.step.goal = .distance(2, .miles)
-        workStep1.step.alert = .speed(10, unit: .milesPerHour, metric: .current)
-        
-        // Recovery step.
-        var recoveryStep1 = IntervalStep(.recovery)
-        recoveryStep1.step.goal = .distance(0.5, .miles)
-        recoveryStep1.step.alert = .heartRate(zone: 1)
-        
-        return IntervalBlock(steps: [workStep1, recoveryStep1],
-                             iterations: 4)
-    }
-    
-    static func cyclingBlockTwo() -> IntervalBlock {
-        // Work step.
-        var workStep2 = IntervalStep(.work)
-        workStep2.step.goal = .time(2, .minutes)
-        workStep2.step.alert = .power(250...275, unit: .watts)
-        
-        // Recovery step.
-        var recoveryStep2 = IntervalStep(.recovery)
-        recoveryStep2.step.goal = .time(30, .seconds)
-        recoveryStep2.step.alert = .heartRate(zone: 1)
-        
-        // Block with two iterations.
-        return IntervalBlock(steps: [workStep2, recoveryStep2],
-                             iterations: 2)
-    }
-    
-    static func createGolfWorkout() -> SingleGoalWorkout {
-        SingleGoalWorkout(activity: .golf,
-                          goal: .time(1, .hours))
-    }
-    
-    static func createRunningCustomWorkout() -> CustomWorkout {
-        let warmupStep = WorkoutStep(goal: .time(10, .minutes))
-        let cooldownStep = WorkoutStep(goal: .time(10, .minutes))
-        
-        var recoveryStep = IntervalStep(.recovery)
-        recoveryStep.step.goal = .distance(2, .miles)
-        recoveryStep.step.alert = .speed(10...12, unit: .milesPerHour, metric: .current)
-        
-        var tempoStep = IntervalStep(.work)
-        tempoStep.step.goal = .distance(3, .miles)
-        tempoStep.step.alert = .speed(10...15, unit: .milesPerHour, metric: .current)
-        
-        var block = IntervalBlock()
-        
-        block.steps = [
-            recoveryStep,
-            tempoStep,
-            tempoStep,
-            recoveryStep
-        ]
-        block.iterations = 4
-        
-        return CustomWorkout(activity: .running,
-                             location: .outdoor,
-                             displayName: "Dauerlauf 45 min",
-                             warmup: warmupStep,
-                             blocks: [block],
-                             cooldown: cooldownStep)
-    }
-}
-
 

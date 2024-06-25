@@ -595,6 +595,17 @@ extension SwiftHealthKitReporterPlugin {
                                 }
                                 intenseStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .average);
                             }
+                        } else if step.target?.type == Twaiv.TargetType.heartRate {
+                            var lower = step.target?.lowerBound ?? 0
+                            var upper = step.target?.upperBound ?? 0
+                            if upper > 0 && lower >= upper {
+                                let delta = lower - upper
+                                if delta < 10 {
+                                    lower += (10-delta)/2
+                                    upper -= (10-delta)/2
+                                }
+                                intenseStep.step.alert = .heartRate(lower...upper)
+                            }
                         }
                         block.steps.append(intenseStep)
                         if istep.recovery > 0 {
@@ -612,6 +623,19 @@ extension SwiftHealthKitReporterPlugin {
                                     }
                                     recoveryStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .average);
                                 }
+                            } else if step.interval?.recoveryTarget?.type == Twaiv.TargetType.heartRate &&
+                                step.interval?.recoveryTargetSemanticPace != Twaiv.SemanticPace.paceNone &&
+                                step.interval?.recoveryTargetSemanticPace != Twaiv.SemanticPace.paceRecovery {
+                                var lower = step.interval?.recoveryTarget?.lowerBound ?? 0
+                                var upper = step.interval?.recoveryTarget?.upperBound ?? 0
+                                if upper > 0 && lower >= upper {
+                                    let delta = lower - upper
+                                    if delta < 10 {
+                                        lower += (10-delta)/2
+                                        upper -= (10-delta)/2
+                                    }
+                                    recoveryStep.step.alert = .heartRate(lower...upper)
+                                }
                             }
                             block.steps.append(recoveryStep)
                         }
@@ -628,6 +652,17 @@ extension SwiftHealthKitReporterPlugin {
                                 upper -= (16-delta)/2
                             }
                             workoutStep.step.alert = .speed(1000/lower...1000/upper, unit: .metersPerSecond, metric: .average)
+                        }
+                    } else if step.target?.type == Twaiv.TargetType.heartRate {
+                        var lower = step.target?.lowerBound ?? 0
+                        var upper = step.target?.upperBound ?? 0
+                        if upper > 0 && lower >= upper {
+                            let delta = lower - upper
+                            if delta < 10 {
+                                lower += (10-delta)/2
+                                upper -= (10-delta)/2
+                            }
+                            workoutStep.step.alert = .heartRate(lower...upper)
                         }
                     }
                     block.steps = [workoutStep]

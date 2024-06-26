@@ -25,11 +25,11 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/health_kit_reporter/ios"
 
 SPEC CHECKSUMS:
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
-  health_kit_reporter: cc8b2973fd907efbafc8cb48795fd4af59e00a4e
+  health_kit_reporter: 6cef104e6a262e12142b0e7eae29948ee94e3f57
   HealthKitReporter: 3511fd29070917a255fa60df7f415c2007f74b73
 
 PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
 
-COCOAPODS: 1.12.0
+COCOAPODS: 1.15.2

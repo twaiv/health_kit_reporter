@@ -369,6 +369,8 @@ struct Twaiv {
         let titlePace: String?
         /// primary id
         let workoutID: String?
+        ///
+        let isOutDoor: Bool?
         
         enum CodingKeys: String, CodingKey {
             case block, description, distance
@@ -383,6 +385,7 @@ struct Twaiv {
             case titleContent = "title_content"
             case titlePace = "title_pace"
             case workoutID = "workout_id"
+            case isOutDoor = "is_out_door"
         }
     }
     
@@ -672,7 +675,7 @@ extension SwiftHealthKitReporterPlugin {
             }
         }
         return CustomWorkout(activity: .running,
-                             location: .outdoor,
+                             location: twaivWorkout.isOutDoor ?? true ? .outdoor : .indoor,
                              displayName: twaivWorkout.title,
                              warmup: warmupStep,
                              blocks: blocks,
